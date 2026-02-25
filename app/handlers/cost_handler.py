@@ -116,10 +116,23 @@ async def process_step_callback(callback: CallbackQuery, state: FSMContext) -> N
         selected_key = data.split(":")[-1]
         if step.multi_select:
             selected = list(answers.get(step.key, []))
-            if selected_key in selected:
-                selected.remove(selected_key)
+            
+            if step.key == "attractions":
+                none_key = "none"
+                if selected_key == none_key:
+                    selected = [] if none_key in selected else [none_key]
+                else:
+                    selected = [item for item in selected if item != none_key]
+                    if selected_key in selected:
+                        selected.remove(selected_key)
+                    else:
+                        selected.append(selected_key)
+
             else:
-                selected.append(selected_key)
+                if selected_key in selected:
+                    selected.remove(selected_key)
+                else:
+                    selected.append(selected_key)
             answers[step.key] = selected
             await state.update_data(answers=answers)
             await callback.message.edit_reply_markup(reply_markup=build_step_keyboard(step, selected))

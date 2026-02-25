@@ -145,6 +145,7 @@ STEPS: list[StepConfig] = [
             Option("bottom_air_massage", "Аэромассаж донный"),
             Option("aero_lounger", "Аэролежак"),
             Option("aero_seat", "Аэросиденье"),
+            Option("none", "Не требуется"),
         ],
         multi_select=True,
     ),
