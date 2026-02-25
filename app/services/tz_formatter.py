@@ -8,6 +8,7 @@ FIELD_LABELS: dict[str, str] = {
     "indoor_outdoor": "Размещение",
     "equipment_location": "Расположение оборудования",
     "pool_type": "Тип бассейна",
+    "embedded_type": "Тип закладных",
     "embedded_material": "Материал чаши",
     "water_type": "Тип воды",
     "purpose": "Назначение",

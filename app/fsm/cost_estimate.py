@@ -8,6 +8,7 @@ class CostEstimateFSM(StatesGroup):
     indoor_outdoor = State()
     equipment_location = State()
     pool_type = State()
+    embedded_type = State()
     embedded_material = State()
     water_type = State()
     purpose = State()
