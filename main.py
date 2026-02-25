@@ -8,6 +8,7 @@ from aiogram.client.default import DefaultBotProperties
 
 from app.config import BOT_TOKEN
 from app.handlers.project_configurator import router as project_router
+from app.handlers.cost_handler import router as cost_router
 from app.handlers.menu import router as menu_router
 
 
@@ -23,6 +24,10 @@ async def main() -> None:
     dp.include_router(project_router)
 
     # ✅ ПОТОМ общее меню (с fallback)
+    # ✅ ПОТОМ калькулятор предварительной стоимости
+    dp.include_router(cost_router)
+
+    # ✅ В конце общее меню (с fallback)
     dp.include_router(menu_router)
 
     await dp.start_polling(bot)
