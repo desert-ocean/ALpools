@@ -1,18 +1,28 @@
 print("=== ЗАПУЩЕН НОВЫЙ MAIN.PY ===")
+
 import asyncio
 
 from aiogram import Bot, Dispatcher
+from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.client.default import DefaultBotProperties
 
 from app.config import BOT_TOKEN
+from app.handlers.project_configurator import router as project_router
 from app.handlers.menu import router as menu_router
-from app.handlers.start import router as start_router
 
 
 async def main() -> None:
-    bot = Bot(token=BOT_TOKEN)
-    dp = Dispatcher()
+    bot = Bot(
+        token=BOT_TOKEN,
+        default=DefaultBotProperties(parse_mode="HTML")
+    )
 
-    dp.include_router(start_router)
+    dp = Dispatcher(storage=MemoryStorage())
+
+    # ✅ СНАЧАЛА конфигуратор
+    dp.include_router(project_router)
+
+    # ✅ ПОТОМ общее меню (с fallback)
     dp.include_router(menu_router)
 
     await dp.start_polling(bot)
