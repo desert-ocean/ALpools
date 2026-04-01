@@ -1,0 +1,14 @@
+﻿{
+  "task_id": "AUTO-003",
+  "title": "Замена квадратных маркеров на эмодзи в меню разделов проектирования",
+  "status": "ready_for_lead_gate",
+  "role": "QA",
+  "area": "product",
+  "main_artifact": "app/handlers/project_configurator.py",
+  "review_required": true,
+  "review_artifact": "docs/autopilot/tasks/dossiers/AUTO-003/qa.md",
+  "review_summary": "Проверены тексты кнопок, сохранность callback_data и отсутствие изменений в FSM.",
+  "depends_on": [],
+  "next_task": "TeamLead gate",
+  "updated_at": "2026-04-01T00:00:00Z"
+}

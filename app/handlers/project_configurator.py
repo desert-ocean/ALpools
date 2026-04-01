@@ -136,17 +136,13 @@ PROJECT_SECTIONS = {
     },
 }
 
-ATTRACTION_PRICE = 25_000
+OPTIONAL_SHEET_PRICE = 20_000
+ATTRACTION_PRICE = 18_000
+LIGHTING_PRICE = 10_000
 
-TYPE_COEFFICIENT = {
-    "private": 1.0,
-    "public": 1.4,
-}
 
-PLACEMENT_COEFFICIENT = {
-    "indoor": 1.2,
-    "outdoor": 1.0,
-}
+def _format_price(value: int) -> str:
+    return f"{value:,}".replace(",", " ")
 
 
 # =====================================================
@@ -160,6 +156,7 @@ class ProjectFSM(StatesGroup):
     choosing_type = State()
     choosing_placement = State()
     choosing_attractions = State()
+    choosing_lighting = State()
     result = State()
     waiting_phone = State()
     waiting_email = State()
@@ -170,6 +167,13 @@ class ProjectFSM(StatesGroup):
 # =====================================================
 
 SECTION_LIST_TEXT = "📐 <b>Выберите разделы проектирования:</b>"
+SECTION_EMOJIS = {
+    "technology": "⚙️",
+    "architecture": "🏗",
+    "electric": "⚡",
+    "automation": "🤖",
+    "constructive": "🧱",
+}
 
 
 def _get_selected_section_keys(designs: dict[str, dict]) -> list[str]:
@@ -180,12 +184,127 @@ def _build_design_payload(
     section_key: str,
     mode: str,
     selected_options: list[str] | None = None,
+    attractions_count: int = 0,
+    lighting: bool | None = None,
+    price: int = 0,
 ) -> dict:
     return {
         "section": section_key,
         "mode": mode,
         "selected_options": list(selected_options or []),
+        "attractions_count": attractions_count,
+        "lighting": lighting,
+        "price": price,
     }
+
+
+def calculate_price(state_data: dict) -> tuple[int, list[str]]:
+    designs = state_data.get("designs", {})
+    sections = state_data.get("sections", [])
+    pool_type = state_data.get("pool_type")
+    placement = state_data.get("placement")
+    attractions = state_data.get("attractions", 0)
+    lighting = state_data.get("lighting")
+
+    total = 0
+    breakdown = ["📐 <b>Выбранные разделы:</b>", ""]
+
+    for key in sections:
+        section = PROJECT_SECTIONS[key]
+        design = designs.get(key, {})
+        base_price = section["price"]
+        selected_options = design.get("selected_options", [])
+        public_surcharge = int(base_price * 0.8) if key == "technology" and pool_type == "public" else 0
+        outdoor_surcharge = int(base_price * 0.6) if key == "constructive" and placement == "outdoor" else 0
+        optional_sheets_surcharge = len(selected_options) * OPTIONAL_SHEET_PRICE
+        section_total = (
+            base_price
+            + public_surcharge
+            + outdoor_surcharge
+            + optional_sheets_surcharge
+        )
+        total += section_total
+
+        mode = "быстрый выбор" if design.get("mode") == "fast" else "подробный выбор"
+        selected_options_label = ", ".join(selected_options) if selected_options else "нет"
+
+        breakdown.extend(
+            [
+                f"<b>{section['name']}</b>",
+                f"Режим: {mode}",
+                f"Состав: базовый комплект",
+                f"Дополнительные листы: {selected_options_label}",
+                f"Базовая: {_format_price(base_price)} ₽",
+            ]
+        )
+
+        if public_surcharge:
+            breakdown.append(
+                "Доплата за общественный бассейн: "
+                f"{_format_price(base_price)} × 0.8 = {_format_price(public_surcharge)} ₽"
+            )
+
+        if outdoor_surcharge:
+            breakdown.append(
+                "Доплата за отдельно стоящий бассейн: "
+                f"{_format_price(base_price)} × 0.6 = {_format_price(outdoor_surcharge)} ₽"
+            )
+
+        if optional_sheets_surcharge:
+            breakdown.append(
+                "Доплата за дополнительные листы: "
+                f"{len(selected_options)} × {_format_price(OPTIONAL_SHEET_PRICE)} = "
+                f"{_format_price(optional_sheets_surcharge)} ₽"
+            )
+
+        breakdown.extend([
+            f"Итого: {_format_price(section_total)} ₽",
+            "",
+        ])
+
+    attractions_sum = attractions * ATTRACTION_PRICE
+    if attractions:
+        total += attractions_sum
+        breakdown.extend(
+            [
+                "🎢 <b>Аттракционы:</b>",
+                f"{attractions} × {_format_price(ATTRACTION_PRICE)} = {_format_price(attractions_sum)} ₽",
+                "",
+            ]
+        )
+
+    if lighting is True:
+        total += LIGHTING_PRICE
+        breakdown.extend(
+            [
+                "💡 <b>Подводное освещение:</b>",
+                f"{_format_price(LIGHTING_PRICE)} ₽",
+                "",
+            ]
+        )
+    elif lighting is False:
+        breakdown.extend([
+            "💡 <b>Подводное освещение:</b>",
+            "не выбрано",
+            "",
+        ])
+    else:
+        breakdown.extend([
+            "💡 <b>Подводное освещение:</b>",
+            "пропущено",
+            "",
+        ])
+
+    return total, breakdown
+
+
+def _render_preliminary_calculation_text(total: int, breakdown: list[str]) -> str:
+    return (
+        "💰 <b>Предварительный расчёт</b>\n\n"
+        + "\n".join(breakdown).rstrip()
+        + f"\n\n💵 <b>ИТОГО: {_format_price(total)} ₽</b>\n\n"
+        + "⚠ <i>Расчёт ориентировочный.</i>"
+    )
 
 
 def _render_section_action_text(section_key: str) -> str:
@@ -240,10 +359,11 @@ def sections_keyboard(selected: list[str]) -> InlineKeyboardMarkup:
     buttons = []
 
     for key, section in PROJECT_SECTIONS.items():
-        mark = "☑" if key in selected else "⬜"
+        emoji = SECTION_EMOJIS[key]
+        text_prefix = f"☑ {emoji}" if key in selected else emoji
         buttons.append([
             InlineKeyboardButton(
-                text=f"{mark} {section['name']} ({section['price']:,} ₽)",
+                text=f"{text_prefix} {section['name']} ({section['price']:,} ₽)",
                 callback_data=f"section:{key}",
             )
         ])
@@ -299,11 +419,29 @@ def attractions_keyboard(current: int) -> InlineKeyboardMarkup:
 # СТАРТ
 # =====================================================
 
+def lighting_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="Да", callback_data="lighting:yes"),
+            InlineKeyboardButton(text="Нет", callback_data="lighting:no"),
+        ],
+        [
+            InlineKeyboardButton(text="Пропустить", callback_data="lighting:skip"),
+        ],
+    ])
+
+
 @router.message(F.text == BTN_DESIGN)
 async def start_configurator(message: Message, state: FSMContext):
     await state.clear()
     await state.set_state(ProjectFSM.choosing_sections)
-    await state.update_data(sections=[], designs={}, current_section=None, attractions=0)
+    await state.update_data(
+        sections=[],
+        designs={},
+        current_section=None,
+        attractions=0,
+        lighting=None,
+    )
 
     await message.answer(
         SECTION_LIST_TEXT,
@@ -501,7 +639,7 @@ async def choose_pool_type(callback: CallbackQuery, state: FSMContext):
 async def choose_placement(callback: CallbackQuery, state: FSMContext):
     placement = callback.data.split(":", maxsplit=1)[1]
 
-    await state.update_data(placement=placement, attractions=0)
+    await state.update_data(placement=placement, attractions=0, lighting=None)
     await state.set_state(ProjectFSM.choosing_attractions)
 
     await callback.message.answer(
@@ -527,7 +665,14 @@ async def manage_attractions(callback: CallbackQuery, state: FSMContext):
     elif action == "minus" and count > 0:
         count -= 1
     elif action == "calculate":
-        await calculate_price(callback, state)
+        await state.update_data(attractions=count)
+        await state.set_state(ProjectFSM.choosing_lighting)
+        await callback.message.answer(
+            "💡 <b>Дополнительные уточнения</b>\n\n"
+            "Необходимо ли подводное освещение бассейна?",
+            reply_markup=lighting_keyboard(),
+        )
+        await callback.answer()
         return
 
     await state.update_data(attractions=count)
@@ -543,50 +688,41 @@ async def manage_attractions(callback: CallbackQuery, state: FSMContext):
 # РАСЧЕТ
 # =====================================================
 
-async def calculate_price(callback: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
+@router.callback_query(ProjectFSM.choosing_lighting, F.data.startswith("lighting:"))
+async def choose_lighting(callback: CallbackQuery, state: FSMContext):
+    action = callback.data.split(":", maxsplit=1)[1]
+    lighting_map = {
+        "yes": True,
+        "no": False,
+        "skip": None,
+    }
+    lighting = lighting_map[action]
 
-    designs = data.get("designs", {})
-    sections = data.get("sections", [])
-    pool_type = data.get("pool_type")
-    placement = data.get("placement")
+    data = await state.get_data()
+    designs = dict(data.get("designs", {}))
     attractions = data.get("attractions", 0)
 
-    total = 0
-    breakdown = ["📐 <b>Выбранные разделы:</b>\n"]
+    for section_key, design in designs.items():
+        updated_design = dict(design)
+        updated_design["attractions_count"] = attractions
+        updated_design["lighting"] = lighting
+        designs[section_key] = updated_design
 
-    for key in sections:
-        section = PROJECT_SECTIONS[key]
-        design = designs.get(key, {})
-        base = section["price"]
-        extra = base * section["option_percent"] / 100
-        section_total = base + extra
-        total += section_total
+    await state.update_data(designs=designs, lighting=lighting)
+    await calculate_price_result(callback, state)
 
-        mode = "быстрый выбор" if design.get("mode") == "fast" else "подробный выбор"
-        selected_options = design.get("selected_options", [])
-        selected_options_label = ", ".join(selected_options) if selected_options else "базовый комплект"
 
-        breakdown.append(
-            f"• <b>{section['name']}</b>\n"
-            f"   Режим: {mode}\n"
-            f"   Состав: {selected_options_label}\n"
-            f"   Базовая: {base:,} ₽\n"
-            f"   Доп. ({section['option_percent']}%): {int(extra):,} ₽\n"
-            f"   Итого: {int(section_total):,} ₽\n"
-        )
+async def calculate_price_result(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    total, breakdown = calculate_price(data)
+    designs = dict(data.get("designs", {}))
 
-    attractions_sum = attractions * ATTRACTION_PRICE
-    total += attractions_sum
+    for section_key, design in designs.items():
+        updated_design = dict(design)
+        updated_design["price"] = total
+        designs[section_key] = updated_design
 
-    if attractions:
-        breakdown.append(
-            f"\n🎢 Аттракционы: {attractions} × {ATTRACTION_PRICE:,} ₽ = {attractions_sum:,} ₽"
-        )
-
-    total = int(total * TYPE_COEFFICIENT[pool_type] * PLACEMENT_COEFFICIENT[placement])
-
-    await state.update_data(total=total)
+    await state.update_data(designs=designs, total=total)
     await state.set_state(ProjectFSM.result)
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -594,11 +730,7 @@ async def calculate_price(callback: CallbackQuery, state: FSMContext):
     ])
 
     await callback.message.answer(
-        "💰 <b>Предварительный расчёт</b>\n\n"
-        + "\n".join(breakdown)
-        + "\n\n━━━━━━━━━━━━━━━\n"
-        + f"<b>ИТОГО: {total:,} ₽</b>\n\n"
-        + "⚠ <i>Расчёт ориентировочный.</i>",
+        _render_preliminary_calculation_text(total, breakdown),
         reply_markup=keyboard,
     )
 

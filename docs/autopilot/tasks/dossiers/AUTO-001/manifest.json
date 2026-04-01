@@ -1,0 +1,14 @@
+﻿{
+  "task_id": "AUTO-001",
+  "title": "Добавить шаг подводного освещения в FSM конфигуратора",
+  "status": "ready_for_lead_gate",
+  "role": "QA",
+  "area": "product",
+  "main_artifact": "app/handlers/project_configurator.py",
+  "review_required": true,
+  "review_artifact": "docs/autopilot/tasks/dossiers/AUTO-001/qa.md",
+  "review_summary": "Проверены точка встройки шага, сохранение lighting и синтаксическая корректность обновленного FSM.",
+  "depends_on": [],
+  "next_task": "",
+  "updated_at": "2026-04-01T00:00:00Z"
+}
