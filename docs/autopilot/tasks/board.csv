@@ -1,0 +1,2 @@
+task_id,title,status,role,area,priority,source,updated_at,next_owner,main_artifact,notes
+AUTO-000,Autopilot foundation for ALpools,done,Autopilot Maintainer,autopilot,high,user_request,2026-03-31,Coordinator,docs/autopilot/README.md,Initial full contour bootstrap

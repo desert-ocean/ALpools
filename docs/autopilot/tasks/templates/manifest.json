@@ -1,0 +1,14 @@
+{
+  "task_id": "TASK-ID",
+  "title": "Task title",
+  "status": "todo",
+  "role": "Coordinator",
+  "area": "product",
+  "main_artifact": "",
+  "review_required": true,
+  "review_artifact": "",
+  "review_summary": "",
+  "depends_on": [],
+  "next_task": "",
+  "updated_at": "2026-03-31T00:00:00Z"
+}

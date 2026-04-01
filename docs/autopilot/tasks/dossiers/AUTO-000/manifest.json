@@ -1,0 +1,14 @@
+{
+  "task_id": "AUTO-000",
+  "title": "Autopilot foundation for ALpools",
+  "status": "done",
+  "role": "Autopilot Maintainer",
+  "area": "autopilot",
+  "main_artifact": "AGENTS.md",
+  "review_required": true,
+  "review_artifact": "docs/autopilot/tasks/dossiers/AUTO-000/qa.md",
+  "review_summary": "Bootstrap contour reviewed for structure completeness and internal link coverage.",
+  "depends_on": [],
+  "next_task": "",
+  "updated_at": "2026-03-31T00:00:00Z"
+}
