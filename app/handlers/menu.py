@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 from datetime import datetime
@@ -15,8 +16,15 @@ from aiogram.types import (
 )
 
 from app.config import ADMIN_ID
+from app.data.welcome_media import (
+    WELCOME_TEXT,
+    build_welcome_media_group,
+    get_welcome_photo_source,
+)
+from app.keyboards.start_kb import get_welcome_keyboard
 
 router = Router()
+logger = logging.getLogger(__name__)
 
 # ==========================================================
 # КНОПКИ МЕНЮ
@@ -78,6 +86,22 @@ async def show_main_menu(message: Message, text: str = "Выберите раз�
     await message.answer(text, reply_markup=get_main_menu_keyboard())
 
 
+async def send_welcome_sequence(message: Message) -> None:
+    try:
+        await message.answer_photo(
+            photo=get_welcome_photo_source(),
+            caption=WELCOME_TEXT,
+            reply_markup=get_welcome_keyboard(),
+        )
+        await message.answer_media_group(build_welcome_media_group())
+    except FileNotFoundError as error:
+        logger.warning("Welcome media file is missing: %s", error)
+        await message.answer(
+            WELCOME_TEXT,
+            reply_markup=get_welcome_keyboard(),
+        )
+
+
 async def notify_admin(bot: Bot, user: User, phone: str) -> None:
     created_at = datetime.now().strftime("%d.%m.%Y %H:%M")
 
@@ -113,7 +137,8 @@ async def handle_lead_submission(message: Message, phone: str) -> None:
 
 @router.message(CommandStart())
 async def cmd_start(message: Message) -> None:
-    await show_main_menu(message)
+    await send_welcome_sequence(message)
+    await show_main_menu(message, "Разделы бота доступны ниже:")
 
 
 @router.message(F.text == BTN_BACK)

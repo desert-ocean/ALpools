@@ -1,0 +1,14 @@
+{
+  "task_id": "AUTO-009",
+  "title": "Приветственный /start с фото компании и MediaGroup",
+  "status": "done",
+  "role": "TeamLead",
+  "area": "product",
+  "main_artifact": "app/handlers/menu.py",
+  "review_required": true,
+  "review_artifact": "",
+  "review_summary": "Рабочий /start в menu-router отправляет welcome-фото с точным текстом, inline-кнопкой консультации и MediaGroup, после чего сохраняет существующее reply-меню и consultation callback без регрессии по маршрутам.",
+  "depends_on": [],
+  "next_task": "",
+  "updated_at": "2026-04-06T15:30:00Z"
+}
