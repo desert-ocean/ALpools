@@ -1,0 +1,18 @@
+{
+  "task_id": "AUTO-007",
+  "title": "Миграция каталога проектов на единый JSON-источник",
+  "status": "ready_for_qa",
+  "role": "QA",
+  "area": "product",
+  "main_artifact": "app/services/projects_service.py",
+  "review_required": true,
+  "review_artifact": "",
+  "review_summary": "",
+  "depends_on": [
+    "AUTO-004",
+    "AUTO-005",
+    "AUTO-006"
+  ],
+  "next_task": "",
+  "updated_at": "2026-04-06T13:10:00Z"
+}

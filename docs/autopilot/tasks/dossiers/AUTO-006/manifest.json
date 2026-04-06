@@ -1,0 +1,16 @@
+{
+  "task_id": "AUTO-006",
+  "title": "Редактирование, удаление и публикация проектов каталога",
+  "status": "ready_for_qa",
+  "role": "QA",
+  "area": "product",
+  "main_artifact": "app/handlers/admin_projects.py",
+  "review_required": true,
+  "review_artifact": "",
+  "review_summary": "",
+  "depends_on": [
+    "AUTO-005"
+  ],
+  "next_task": "",
+  "updated_at": "2026-04-06T12:00:00Z"
+}

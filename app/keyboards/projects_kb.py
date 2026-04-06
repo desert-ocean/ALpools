@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from app.data.projects import get_projects
+from app.services.projects_service import get_all_projects
 
 
 def keyboard_projects_list() -> InlineKeyboardMarkup:
@@ -11,12 +11,12 @@ def keyboard_projects_list() -> InlineKeyboardMarkup:
                 callback_data=f"project_{project.id}",
             )
         ]
-        for project in get_projects()
+        for project in get_all_projects()
     ]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def keyboard_project_card(project_id: str) -> InlineKeyboardMarkup:
+def keyboard_project_card(project_id: str | int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [

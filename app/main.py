@@ -9,6 +9,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from app.config import settings
 from app.db.base import Base
 from app.db.engine import engine
+from app.handlers.admin_projects import router as admin_projects_router
 from app.fsm.handlers import router as project_router
 
 
@@ -31,6 +32,7 @@ async def main() -> None:
     )
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(project_router)
+    dp.include_router(admin_projects_router)
 
     await on_startup()
     try:

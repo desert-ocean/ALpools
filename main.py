@@ -7,6 +7,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.client.default import DefaultBotProperties
 
 from app.config import BOT_TOKEN
+from app.handlers.admin_projects import router as admin_projects_router
 from app.handlers.project_configurator import router as project_router
 from app.handlers.projects import router as projects_router
 from app.handlers.cost_handler import router as cost_router
@@ -24,6 +25,7 @@ async def main() -> None:
     # ✅ СНАЧАЛА конфигуратор
     dp.include_router(project_router)
     dp.include_router(projects_router)
+    dp.include_router(admin_projects_router)
 
     # ✅ ПОТОМ общее меню (с fallback)
     # ✅ ПОТОМ калькулятор предварительной стоимости

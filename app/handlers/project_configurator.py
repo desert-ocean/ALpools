@@ -9,8 +9,8 @@ from aiogram.types import (
 )
 
 from app.config import ADMIN_ID
-from app.data.projects import get_project_by_id
 from app.handlers.menu import BTN_DESIGN
+from app.services.projects_service import get_project_by_id
 
 router = Router()
 
