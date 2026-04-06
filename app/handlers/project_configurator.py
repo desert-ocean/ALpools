@@ -9,6 +9,7 @@ from aiogram.types import (
 )
 
 from app.config import ADMIN_ID
+from app.data.projects import get_project_by_id
 from app.handlers.menu import BTN_DESIGN
 
 router = Router()
@@ -158,6 +159,7 @@ class ProjectFSM(StatesGroup):
     choosing_attractions = State()
     choosing_lighting = State()
     result = State()
+    waiting_name = State()
     waiting_phone = State()
     waiting_email = State()
 
@@ -349,6 +351,13 @@ def _format_design_summary(section_key: str, designs: dict[str, dict]) -> str:
     options = design.get("selected_options", [])
     options_label = ", ".join(options) if options else "базовый комплект"
     return f"{PROJECT_SECTIONS[section_key]['name']} ({mode_label}) — {options_label}"
+
+
+def _build_catalog_request_text(project_title: str) -> str:
+    return (
+        "📥 <b>НОВАЯ ЗАЯВКА ПО КАТАЛОГУ</b>\n\n"
+        f"🏊 Проект: <b>{project_title}</b>"
+    )
 
 
 # =====================================================
@@ -753,6 +762,17 @@ async def request_phone(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
+@router.message(ProjectFSM.waiting_name)
+async def process_name(message: Message, state: FSMContext):
+    await state.update_data(client_name=message.text.strip())
+    await state.set_state(ProjectFSM.waiting_phone)
+
+    await message.answer(
+        "📱 <b>Введите ваш номер телефона:</b>\n"
+        "Например: +7 999 123 45 67"
+    )
+
+
 @router.message(ProjectFSM.waiting_phone)
 async def process_phone(message: Message, state: FSMContext):
     await state.update_data(phone=message.text.strip())
@@ -773,22 +793,36 @@ async def process_email(message: Message, state: FSMContext):
     data = await state.get_data()
 
     user = message.from_user
+    project = get_project_by_id(data.get("selected_project", ""))
+    client_name = data.get("client_name") or user.full_name
     designs = data.get("designs", {})
+    if project is not None and data.get("request_source") == "project_catalog":
+        admin_text = (
+            _build_catalog_request_text(project.title)
+            + "\n\n"
+            + f"👤 {client_name}\n"
+            + f"🆔 {user.id}\n"
+            + f"📱 {data.get('phone')}\n"
+            + f"📧 {data.get('email')}\n"
+            + f"📍 Город проекта: {project.city}\n"
+            + f"📐 Размер: {project.size}\n"
+            + f"💧 Тип: {project.type}"
+        )
+    else:
+        sections_list = "\n".join(
+            f"• {_format_design_summary(section_key, designs)}"
+            for section_key in data.get("sections", [])
+        )
 
-    sections_list = "\n".join(
-        f"• {_format_design_summary(section_key, designs)}"
-        for section_key in data.get("sections", [])
-    )
-
-    admin_text = (
-        "📥 <b>НОВАЯ ЗАЯВКА</b>\n\n"
-        f"👤 {user.full_name}\n"
-        f"🆔 {user.id}\n"
-        f"📱 {data.get('phone')}\n"
-        f"📧 {data.get('email')}\n\n"
-        f"📐 Разделы:\n{sections_list}\n\n"
-        f"💰 Сумма: <b>{data.get('total', 0):,} ₽</b>"
-    )
+        admin_text = (
+            "📥 <b>НОВАЯ ЗАЯВКА</b>\n\n"
+            f"👤 {client_name}\n"
+            f"🆔 {user.id}\n"
+            f"📱 {data.get('phone')}\n"
+            f"📧 {data.get('email')}\n\n"
+            f"📐 Разделы:\n{sections_list}\n\n"
+            f"💰 Сумма: <b>{data.get('total', 0):,} ₽</b>"
+        )
 
     await message.bot.send_message(ADMIN_ID, admin_text)
 

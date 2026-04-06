@@ -8,6 +8,7 @@ from aiogram.client.default import DefaultBotProperties
 
 from app.config import BOT_TOKEN
 from app.handlers.project_configurator import router as project_router
+from app.handlers.projects import router as projects_router
 from app.handlers.cost_handler import router as cost_router
 from app.handlers.menu import router as menu_router
 
@@ -22,6 +23,7 @@ async def main() -> None:
 
     # ✅ СНАЧАЛА конфигуратор
     dp.include_router(project_router)
+    dp.include_router(projects_router)
 
     # ✅ ПОТОМ общее меню (с fallback)
     # ✅ ПОТОМ калькулятор предварительной стоимости

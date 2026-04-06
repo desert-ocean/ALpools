@@ -1,0 +1,14 @@
+{
+  "task_id": "AUTO-004",
+  "title": "Каталог реализованных проектов и конверсия в заявку",
+  "status": "ready_for_qa",
+  "role": "QA",
+  "area": "product",
+  "main_artifact": "app/handlers/projects.py",
+  "review_required": true,
+  "review_artifact": "docs/autopilot/tasks/dossiers/AUTO-004/qa.md",
+  "review_summary": "",
+  "depends_on": [],
+  "next_task": "",
+  "updated_at": "2026-04-06T12:00:00Z"
+}
