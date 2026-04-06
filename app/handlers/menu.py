@@ -22,11 +22,10 @@ router = Router()
 # КНОПКИ МЕНЮ
 # ==========================================================
 
-BTN_INDIVIDUAL_CALC = "💰 Предварительная стоимость бассейна"
+BTN_INDIVIDUAL_CALC = "🧠 Виртуальный конфигуратор"
 BTN_TZ = "📥 Скачать техническое задание"
 BTN_DESIGN = "📐 Проектирование бассейна"  # ОБРАБАТЫВАЕТСЯ В project_configurator.py
 BTN_PROJECTS = "🏗 Реализованные проекты"
-BTN_POOL_TYPE = "🧠 Виртуальный конфигуратор"
 BTN_CONSULT = "📞 Консультация"
 BTN_CONTACTS = "📍 Контакты"
 
@@ -55,7 +54,6 @@ def get_main_menu_keyboard() -> ReplyKeyboardMarkup:
             [KeyboardButton(text=BTN_TZ)],
             [KeyboardButton(text=BTN_DESIGN)],
             [KeyboardButton(text=BTN_PROJECTS)],
-            [KeyboardButton(text=BTN_POOL_TYPE)],
             [KeyboardButton(text=BTN_CONSULT)],
             [KeyboardButton(text=BTN_CONTACTS)],
         ],
@@ -225,24 +223,10 @@ async def receive_phone_text(message: Message) -> None:
 # ПРОЧИЕ РАЗДЕЛЫ (без BTN_DESIGN!)
 # ==========================================================
 
-@router.message(F.text == BTN_INDIVIDUAL_CALC)
-async def individual_calculation(message: Message) -> None:
-    await message.answer(
-        "Раздел расчёта стоимости находится в разработке."
-    )
-
-
 @router.message(F.text == BTN_PROJECTS)
 async def realized_projects(message: Message) -> None:
     await message.answer(
         "Раздел с реализованными проектами скоро будет доступен."
-    )
-
-
-@router.message(F.text == BTN_POOL_TYPE)
-async def choose_pool_type(message: Message) -> None:
-    await message.answer(
-        "Виртуальный конфигуратор находится в разработке."
     )
 
 # ==========================================================
