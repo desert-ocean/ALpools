@@ -66,3 +66,10 @@
 - Следующий owner: `—`
 - Результат: `/start` в рабочем menu-router отправляет welcome-фото с фиксированным текстом и inline-кнопкой `📞 Получить консультацию`, затем галерею `MediaGroup` из `project1.jpg`-`project3.jpg` и после этого возвращает существующее reply-меню без изменения callback `go_consult` и остальных хендлеров.
 
+### AUTO-010 - Расширение стартовой MediaGroup до 6 фото
+
+- Статус: `ready_for_lead_gate`
+- Текущий owner: `QA`
+- Следующий owner: `TeamLead`
+- Результат: `/start` в рабочем menu-router отправляет `MediaGroup` из `project1.jpg`-`project6.jpg`, caption вынесен в первый элемент альбома, а inline-кнопка `📞 Получить консультацию` отправляется отдельным сообщением из-за ограничения Telegram на клавиатуры в media group; существующее reply-меню и callback `go_consult` сохранены.
+

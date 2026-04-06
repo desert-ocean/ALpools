@@ -19,7 +19,6 @@ from app.config import ADMIN_ID
 from app.data.welcome_media import (
     WELCOME_TEXT,
     build_welcome_media_group,
-    get_welcome_photo_source,
 )
 from app.keyboards.start_kb import get_welcome_keyboard
 
@@ -88,12 +87,11 @@ async def show_main_menu(message: Message, text: str = "Выберите раз�
 
 async def send_welcome_sequence(message: Message) -> None:
     try:
-        await message.answer_photo(
-            photo=get_welcome_photo_source(),
-            caption=WELCOME_TEXT,
+        await message.answer_media_group(build_welcome_media_group())
+        await message.answer(
+            "\u2063",
             reply_markup=get_welcome_keyboard(),
         )
-        await message.answer_media_group(build_welcome_media_group())
     except FileNotFoundError as error:
         logger.warning("Welcome media file is missing: %s", error)
         await message.answer(

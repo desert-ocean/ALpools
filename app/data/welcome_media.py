@@ -18,11 +18,13 @@ WELCOME_TEXT = (
 PHOTOS_DIR = Path(__file__).resolve().parent / "photos"
 
 # Источник может быть локальным файлом, URL или Telegram file_id.
-WELCOME_PHOTO_SOURCE: str | Path = PHOTOS_DIR / "welcome.jpg"
 WELCOME_GALLERY_SOURCES: tuple[str | Path, ...] = (
     PHOTOS_DIR / "project1.jpg",
     PHOTOS_DIR / "project2.jpg",
     PHOTOS_DIR / "project3.jpg",
+    PHOTOS_DIR / "project4.jpg",
+    PHOTOS_DIR / "project5.jpg",
+    PHOTOS_DIR / "project6.jpg",
 )
 
 
@@ -34,12 +36,13 @@ def _resolve_photo_source(source: str | Path) -> str | FSInputFile:
     return source
 
 
-def get_welcome_photo_source() -> str | FSInputFile:
-    return _resolve_photo_source(WELCOME_PHOTO_SOURCE)
-
-
 def build_welcome_media_group() -> list[InputMediaPhoto]:
-    return [
-        InputMediaPhoto(media=_resolve_photo_source(source))
-        for source in WELCOME_GALLERY_SOURCES
-    ]
+    media_group: list[InputMediaPhoto] = []
+    for index, source in enumerate(WELCOME_GALLERY_SOURCES):
+        media_group.append(
+            InputMediaPhoto(
+                media=_resolve_photo_source(source),
+                caption=WELCOME_TEXT if index == 0 else None,
+            )
+        )
+    return media_group

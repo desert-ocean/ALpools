@@ -1,0 +1,16 @@
+{
+  "task_id": "AUTO-010",
+  "title": "Расширение стартовой MediaGroup до 6 фото",
+  "status": "ready_for_lead_gate",
+  "role": "QA",
+  "area": "product",
+  "main_artifact": "app/handlers/menu.py",
+  "review_required": true,
+  "review_artifact": "",
+  "review_summary": "Рабочий /start в menu-router отправляет MediaGroup из project1.jpg-project6.jpg, caption задан только на первом элементе, callback go_consult и reply-меню сохранены. Inline-кнопка консультации оставлена отдельным сообщением, потому что Telegram media group не поддерживает inline keyboard.",
+  "depends_on": [
+    "AUTO-009"
+  ],
+  "next_task": "",
+  "updated_at": "2026-04-06T12:45:00Z"
+}
