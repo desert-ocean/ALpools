@@ -200,7 +200,7 @@ async def company_contacts(message: Message) -> None:
     )
 
     await message.answer(text, reply_markup=keyboard)
-    await message.answer_location(latitude=55.669903, longitude=37.552876)
+    await message.answer_location(latitude=55.661862, longitude=37.546561)
 
 
 @router.callback_query(F.data == "send_company_card")
